@@ -42,11 +42,3 @@ class LoggerConfig:
         :param message: The message to be logged.
         """
         self.logger.info(message)
-
-
-# Example of how to use it in a Django app:
-# Create a logger instance for your app
-my_logger = LoggerConfig('my_app')
-
-# Log a message
-my_logger.log_message('This is a log message from my_app.')
