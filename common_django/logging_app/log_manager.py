@@ -49,7 +49,8 @@ class LoggerConfig:
         """
         Get the log level for the given app, defaulting to 'WARNING' if not specified.
         """
-        log_config = getattr(settings, 'LOGGING_CONFIG', {})
+        # Use the custom setting MY_LOGGING_CONFIG to get the log level for the app
+        log_config = getattr(settings, 'MY_LOGGING_CONFIG', {})
         # Use app-specific log level if defined, otherwise fallback to 'default'
         return log_config.get(app_name, log_config.get('default', 'WARNING'))
 
