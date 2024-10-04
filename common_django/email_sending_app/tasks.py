@@ -10,4 +10,4 @@ def send_email(subject, message, recipient_list):
     - message: The body of the email.
     - recipient_list: List of recipients (email addresses).
     """
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient_list)
+    return send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient_list)
