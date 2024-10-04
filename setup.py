@@ -1,13 +1,11 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='common',
+    name='common_django',
     version='0.1',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=[
-        'Django>=5.0.8',
-    ],
+    install_requires=[],
     author='Kapil Yadav',
     author_email='kapil.yadav@dhl.com',
     description='A minimal Django package with Email Sending and Logging functionality.',
