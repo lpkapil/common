@@ -3,6 +3,7 @@ from django.core.signals import setting_changed
 from django.dispatch import receiver
 import threading
 import schedule
+from django.conf import settings
 
 class LoggingAppConfig(AppConfig):
     name = 'common_django.logging_app'
@@ -10,7 +11,6 @@ class LoggingAppConfig(AppConfig):
 
     def ready(self):
         from common_django.logging_app.schedular import LogScheduler
-        from django.conf import settings
         
         # Store LogScheduler in an instance variable
         self.LogScheduler = LogScheduler
@@ -18,12 +18,12 @@ class LoggingAppConfig(AppConfig):
         """
         Start or stop the scheduler based on LOG_ENABLED setting
         """
-        self.manage_scheduler(settings)
+        self.manage_scheduler()
 
         # Connect the signal to handle setting changes
         setting_changed.connect(self.reload_scheduler_on_change)
 
-    def manage_scheduler(self, settings):
+    def manage_scheduler(self):
         """
         Start or stop the log scheduler based on the LOG_ENABLED setting.
         """
