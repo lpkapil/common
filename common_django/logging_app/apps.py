@@ -15,9 +15,10 @@ class LoggingAppConfig(AppConfig):
         # Store LogScheduler in an instance variable
         self.LogScheduler = LogScheduler
         
-        """
-        Start or stop the scheduler based on LOG_ENABLED setting
-        """
+        # Initialize a threading event to control the scheduler thread
+        self.scheduler_running = threading.Event()
+        
+        # Start or stop the scheduler based on LOG_ENABLED setting
         self.manage_scheduler()
 
         # Connect the signal to handle setting changes
@@ -32,12 +33,24 @@ class LoggingAppConfig(AppConfig):
         interval = getattr(settings, 'LOG_INTERVAL', 1)
 
         print(f'Logging params - LOG_ENABLED: {log_enabled}, LOG_FREQUENCY: {frequency}, LOG_INTERVAL: {interval}')
-
+        
         if log_enabled:
-            
+            # Set the event to signal the scheduler thread to run
+            self.scheduler_running.set()
+
             def start_scheduler():
+                # Create an instance of LogScheduler
                 log_scheduler_instance = self.LogScheduler(frequency=frequency, interval=interval)
                 log_scheduler_instance.start()  # Start the scheduler
+
+                # Schedule the job with a name
+                job_name = 'log_processor_task'  # Define a unique name for the job
+                schedule.every(interval).minutes.do(log_scheduler_instance.log_processor_task).tag(job_name)
+
+                # Keep running while the event is set
+                while self.scheduler_running.is_set():
+                    schedule.run_pending()
+                    time.sleep(1)  # Sleep to prevent busy waiting
 
             # Start the scheduler thread
             self.scheduler_thread = threading.Thread(target=start_scheduler)
@@ -47,22 +60,31 @@ class LoggingAppConfig(AppConfig):
             # Stop logging if it's currently running
             self.stop_logging()
 
+        print('All jobs:', schedule.get_jobs())
+
     def stop_logging(self):
         """
         Stop the log scheduler if it's running.
         """
         print("Stopping logging...")
 
-        # Clear the current schedule
-        schedule.clear()
+        # Clear the running flag to stop the scheduler thread
+        self.scheduler_running.clear()
+        
+        # Instead of clearing all, identify and remove specific jobs by their tag
+        for job in schedule.get_jobs():
+            if job.tags and 'log_processor_task' in job.tags:  # Check for the job tag
+                schedule.cancel_job(job)  # Cancels only the jobs related to logging
+        
+        # Print jobs to confirm they have been cleared
+        print('All jobs after stopping:', schedule.get_jobs())
 
     @receiver(setting_changed)
     def reload_scheduler_on_change(self, sender, setting, value, **kwargs):
         """
-        Restart the log scheduler if LOG_FREQUENCY, LOG_INTERVAL or LOG_ENABLED is changed.
+        Restart the log scheduler if LOG_FREQUENCY, LOG_INTERVAL, or LOG_ENABLED is changed.
         """
         if setting in ['LOG_FREQUENCY', 'LOG_INTERVAL', 'LOG_ENABLED']:
             # Restart the scheduler based on updated LOG_ENABLED setting
-            self.manage_scheduler(sender)
+            self.manage_scheduler()
             print(f"Scheduler reinitialized due to change in {setting}: {value}")
-
