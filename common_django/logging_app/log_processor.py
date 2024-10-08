@@ -7,17 +7,17 @@ from common_django.logging_app.models import RequestLog  # Adjust according to y
 import ast
 import re
 from django.utils.functional import SimpleLazyObject
-from django.db import IntegrityError
+# from django.db import IntegrityError
 import hashlib
 from django.utils import timezone
 from datetime import datetime
 import pytz
 
-# Setup Django if not already done
-def setup_django():
-    if not settings.configured:
-        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lcim.settings')
-        django.setup()
+# # Setup Django if not already done
+# def setup_django():
+#     if not settings.configured:
+#         os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lcim.settings')
+#         django.setup()
 
 # Logger for this module
 logger = logging.getLogger('log_processor')
@@ -31,7 +31,7 @@ print('Log file path:', LOG_FILE_PATH)
 class LogProcessor:
     def __init__(self, log_file_path=LOG_FILE_PATH):
         self.log_file_path = log_file_path
-        setup_django()  # Ensure Django is set up before processing logs
+        # setup_django()  # Ensure Django is set up before processing logs
 
     def process_logs(self):
         """
