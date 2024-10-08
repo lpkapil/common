@@ -1,0 +1,52 @@
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        'default': {
+            'format': '%(asctime)s [%(module)s | %(levelname)s] %(message)s'
+        },
+        "verbose": {
+            "format": "%(levelname)s %(asctime)s %(name)s %(message)s"
+        }
+    },
+    "handlers": {
+        'request_logs_file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / "logs/request_logs.log",
+            'formatter': 'default',
+            'level': 'INFO',
+        },
+        'log_scheduler_file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / "logs/log_scheduler.log",
+            'formatter': 'verbose',
+            'level': 'INFO',
+        },
+        'log_processor_file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / "logs/log_processor_file.log",
+            'formatter': 'verbose',
+            'level': 'INFO',
+        },
+        
+    },
+    "loggers": {
+        'request_logger': {
+            'handlers': ['request_logs_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+
+        'log_scheduler': {
+            'handlers': ['log_scheduler_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+
+        'log_processor': {
+            'handlers': ['log_processor_file'],
+            'level': 'INFO',
+            'propagate': False,
+        }
+    },
+}
