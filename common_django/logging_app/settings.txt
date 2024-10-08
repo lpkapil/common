@@ -50,3 +50,8 @@ LOGGING = {
         }
     },
 }
+
+# Common logging app config
+LOG_ENABLED = False
+LOG_FREQUENCY = 'minutes'  # Frequency for logging
+LOG_INTERVAL = 2  # Interval for the logging scheduler

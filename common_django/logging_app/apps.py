@@ -1,7 +1,8 @@
 from django.apps import AppConfig
 from django.core.signals import setting_changed
 from django.dispatch import receiver
-import threading, schedule
+import threading
+import schedule
 
 class LoggingAppConfig(AppConfig):
     name = 'common_django.logging_app'
@@ -10,40 +11,58 @@ class LoggingAppConfig(AppConfig):
     def ready(self):
         from common_django.logging_app.schedular import LogScheduler
         from django.conf import settings
+        
+        # Store LogScheduler in an instance variable
+        self.LogScheduler = LogScheduler
+        
         """
-        Start the log scheduler and listen for setting changes.
+        Start or stop the scheduler based on LOG_ENABLED setting
         """
-        # Start the scheduler initially with current settings
-        self.start_scheduler(LogScheduler, settings)
+        self.manage_scheduler(settings)
 
         # Connect the signal to handle setting changes
         setting_changed.connect(self.reload_scheduler_on_change)
 
-    def start_scheduler(self, LogScheduler, settings):
+    def manage_scheduler(self, settings):
         """
-        Start the log scheduler with the current settings.
+        Start or stop the log scheduler based on the LOG_ENABLED setting.
         """
+        log_enabled = getattr(settings, 'LOG_ENABLED', False)
         frequency = getattr(settings, 'LOG_FREQUENCY', 'minutes')
         interval = getattr(settings, 'LOG_INTERVAL', 1)
 
-        print('params', [frequency, interval])
+        print(f'Logging params - LOG_ENABLED: {log_enabled}, LOG_FREQUENCY: {frequency}, LOG_INTERVAL: {interval}')
 
-        def start_scheduler():
-            LogScheduler(frequency=frequency, interval=interval)
+        if log_enabled:
+            
+            def start_scheduler():
+                log_scheduler_instance = self.LogScheduler(frequency=frequency, interval=interval)
+                log_scheduler_instance.start()  # Start the scheduler
 
-        scheduler_thread = threading.Thread(target=start_scheduler)
-        scheduler_thread.daemon = True
-        scheduler_thread.start()
+            # Start the scheduler thread
+            self.scheduler_thread = threading.Thread(target=start_scheduler)
+            self.scheduler_thread.daemon = True
+            self.scheduler_thread.start()
+        else:
+            # Stop logging if it's currently running
+            self.stop_logging()
+
+    def stop_logging(self):
+        """
+        Stop the log scheduler if it's running.
+        """
+        print("Stopping logging...")
+
+        # Clear the current schedule
+        schedule.clear()
 
     @receiver(setting_changed)
     def reload_scheduler_on_change(self, sender, setting, value, **kwargs):
         """
-        Restart the log scheduler if LOG_FREQUENCY or LOG_INTERVAL is changed.
+        Restart the log scheduler if LOG_FREQUENCY, LOG_INTERVAL or LOG_ENABLED is changed.
         """
-        if setting == 'LOG_FREQUENCY' or setting == 'LOG_INTERVAL':
-            # Clear current schedule
-            schedule.clear()
-
-            # Restart the scheduler with updated settings
-            self.start_scheduler()
+        if setting in ['LOG_FREQUENCY', 'LOG_INTERVAL', 'LOG_ENABLED']:
+            # Restart the scheduler based on updated LOG_ENABLED setting
+            self.manage_scheduler(sender)
             print(f"Scheduler reinitialized due to change in {setting}: {value}")
+
