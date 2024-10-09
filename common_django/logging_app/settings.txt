@@ -55,3 +55,6 @@ LOGGING = {
 LOG_ENABLED = False
 LOG_FREQUENCY = 'minutes'  # Frequency for logging
 LOG_INTERVAL = 2  # Interval for the logging scheduler
+
+# Middleware entry
+'common_django.logging_app.middleware.SimpleLoggingMiddleware',
