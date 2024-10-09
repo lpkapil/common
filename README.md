@@ -11,15 +11,18 @@ pip install git+https://github.com/lpkapil/common.git@main
 
 ```
 
-Install using (pip install -r requirements.txt):
+Install using requirements.txt:
 
 requirement.txt
+
+To install
 
 ```bash
 
 git+https://github.com/lpkapil/common.git@main
 
 ```
+To install dependencies:
 
 ```bash
 
