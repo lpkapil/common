@@ -1,3 +1,10 @@
+#Import apps in INSTALLED_APPS
+
+'common_django',
+'common_django.logging_app',
+'common_django.email_sending_app',
+
+# Logging
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -58,3 +65,4 @@ LOG_INTERVAL = 2  # Interval for the logging scheduler
 
 # Middleware entry
 'common_django.logging_app.middleware.SimpleLoggingMiddleware',
+
